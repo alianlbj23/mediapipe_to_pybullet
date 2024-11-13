@@ -124,6 +124,7 @@ class MediapipeNode(Node):
                             if relative_z < 0.1:
                                 relative_z = 0.1
                             # 構建消息並通過 rosbridge 發布
+                            relative_x = 0.3
                             point_message = roslibpy.Message({
                                 'x': relative_x,
                                 'y': relative_y,
