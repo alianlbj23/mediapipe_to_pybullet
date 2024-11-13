@@ -74,6 +74,7 @@ class MediapipeNode(Node):
             cv2.putText(image, str(-i), (center_x + 10, y_pos), cv2.FONT_HERSHEY_SIMPLEX, 0.3, (0, 0, 255), 1)
         y_pos = center_y + (40) * scale_y
         cv2.circle(image, (center_x, int(y_pos)), 5, (0, 0, 255), -1)  # 畫紅點
+        return (center_x, int(y_pos))  # 返回紅點位置
 
     def color_callback(self, msg):
         color_image = self.bridge.imgmsg_to_cv2(msg, desired_encoding='bgr8')
@@ -87,11 +88,11 @@ class MediapipeNode(Node):
         cv2.drawMarker(color_image, (center_x_px, center_y_px), (0, 255, 0), markerType=cv2.MARKER_CROSS, markerSize=20, thickness=2)
 
         # 畫出 Y 和 Z 軸的刻度線
-        self.draw_axis(color_image, center_x_px, center_y_px)
-
+        red_dot_pos = self.draw_axis(color_image, center_x_px, center_y_px)
+        center_x, center_y = red_dot_pos
         # 更新中心點的深度
         if self.depth_image is not None:
-            self.center_depth = self.depth_image[center_y_px, center_x_px] / 1000.0
+            self.center_depth = self.depth_image[center_x, center_y] / 1000.0
 
             # 使用 Hands 模組檢測手掌座標
             hand_results = self.hands.process(rgb_image)
