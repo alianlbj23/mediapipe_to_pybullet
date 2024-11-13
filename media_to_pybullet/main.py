@@ -42,7 +42,7 @@ class MediapipeNode(Node):
         # MediaPipe 初始化
         self.mp_hands = mp.solutions.hands
         self.hands = self.mp_hands.Hands(static_image_mode=False, max_num_hands=2, 
-                                         min_detection_confidence=0.5, min_tracking_confidence=0.5)
+                                         min_detection_confidence=0.5)
         
         # 初始化 Pose 模組
         self.mp_pose = mp.solutions.pose
@@ -72,6 +72,8 @@ class MediapipeNode(Node):
             y_pos = center_y + i * scale_y
             cv2.line(image, (center_x - 5, y_pos), (center_x + 5, y_pos), (0, 0, 255), 1)
             cv2.putText(image, str(-i), (center_x + 10, y_pos), cv2.FONT_HERSHEY_SIMPLEX, 0.3, (0, 0, 255), 1)
+        y_pos = center_y + (40) * scale_y
+        cv2.circle(image, (center_x, int(y_pos)), 5, (0, 0, 255), -1)  # 畫紅點
 
     def color_callback(self, msg):
         color_image = self.bridge.imgmsg_to_cv2(msg, desired_encoding='bgr8')
@@ -95,7 +97,7 @@ class MediapipeNode(Node):
             hand_results = self.hands.process(rgb_image)
             if hand_results.multi_hand_landmarks and hand_results.multi_handedness:
                 for hand_landmarks, handedness in zip(hand_results.multi_hand_landmarks, hand_results.multi_handedness):
-                    if handedness.classification[0].label == "Right":
+                    if handedness.classification[0].label == "Left":
                         fingertip = hand_landmarks.landmark[self.mp_hands.HandLandmark.MIDDLE_FINGER_TIP]
                         
                         # 將手掌像素位置轉換為深度影像中的位置
@@ -117,7 +119,7 @@ class MediapipeNode(Node):
                             tmp = relative_y
                             relative_y = -relative_z /100.0
                             relative_z = tmp / 100.0
-                            
+
                             if relative_z < 0.1:
                                 relative_z = 0.1
                             # 構建消息並通過 rosbridge 發布
